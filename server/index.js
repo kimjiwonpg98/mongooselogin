@@ -6,6 +6,7 @@ const User = require("./models/User");
 const bodyParser = require("body-parser");
 const { json } = require("body-parser");
 const cookieParser = require("cookie-parser");
+const auth = require("./middleware/auth");
 
 const POST = 5000;
 //aplication/x-www-form-urlencoded분석
@@ -30,7 +31,7 @@ app.get("/", (req, res) => {
   res.send("Hello");
 });
 
-app.post("/register", (req, res) => {
+app.post("/api/users/register", (req, res) => {
   const user = new User(req.body);
   // user모델에 저장
   user.save((err, doc) => {
@@ -41,7 +42,7 @@ app.post("/register", (req, res) => {
   });
 });
 
-app.post("/login", (req, res) => {
+app.post("/api/users/login", (req, res) => {
   User.findOne({ email: req.body.email }, (err, user) => {
     if (!user) {
       return res.json({
@@ -64,6 +65,25 @@ app.post("/login", (req, res) => {
           .status(200)
           .json({ loginSuccess: true, userId: user._id });
       });
+    });
+  });
+});
+
+app.get("/api/users/auth", auth, (req, res) => {
+  res.status(200).json({
+    _id: req.user._id,
+    isAdmin: req.user.role === 0 ? false : true,
+    isAuth: true,
+    name: req.user.name,
+    role: req.user.role,
+  });
+});
+
+app.get("/api/user/logout", auth, (req, res) => {
+  User.findOneAndUpdate({ _id: req.user._id }, { token: "" }, (err, user) => {
+    if (err) return res.json({ success: false, err });
+    return res.status(200).send({
+      success: true,
     });
   });
 });
