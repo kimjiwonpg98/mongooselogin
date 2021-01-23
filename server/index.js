@@ -30,7 +30,9 @@ mongoose
 app.get("/", (req, res) => {
   res.send("Hello");
 });
-
+app.get("/api/hello", (req, res) => {
+  res.send("hihi");
+});
 app.post("/api/users/register", (req, res) => {
   const user = new User(req.body);
   // user모델에 저장
@@ -79,7 +81,7 @@ app.get("/api/users/auth", auth, (req, res) => {
   });
 });
 
-app.get("/api/user/logout", auth, (req, res) => {
+app.get("/api/users/logout", auth, (req, res) => {
   User.findOneAndUpdate({ _id: req.user._id }, { token: "" }, (err, user) => {
     if (err) return res.json({ success: false, err });
     return res.status(200).send({
